@@ -1,0 +1,17 @@
+name: Build ZMK firmware (corne-eyelash)
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "zmk/corne-eyelash/**"
+      - ".github/workflows/zmk-corne-eyelash-build.yml"
+    paths-ignore:
+      - "zmk/corne-eyelash/keymap-drawer/**"
+      - "zmk/corne-eyelash/README*.md"
+
+jobs:
+  build:
+    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@main
+    with:
+      build_matrix_path: zmk/corne-eyelash/build.yaml
+      config_path: zmk/corne-eyelash/config
