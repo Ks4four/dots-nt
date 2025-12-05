@@ -9,7 +9,9 @@ manifest:
     - name: robotfu
       url-base: https://github.com/robotfu
   projects:
-    # --- 删除掉了 eyelash_corne 的引用，因为现在文件在本地 ---
+    - name: eyelash_corne
+      url: https://github.com/a741725193/zmk-new_corne
+      revision: main
     - name: zmk
       remote: zmkfirmware
       revision: main
