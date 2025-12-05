@@ -48,3 +48,9 @@ here we just use a temp file to do `interProcessCommunication`. current state is
 
 why temp file:\
 for this tool combination, the optimal solution might be a udp socket. but the ai kept trying to use `(import net)`, which is too complex for me since it requires recompiling the binary. simply concatenating a `json` string is obviously much easier.
+
+## zmk
+
+wip
+
+![Eyelash Corne Keymap](zmk/corne-eyelash/keymap-drawer/eyelash_corne.svg)
