@@ -3,11 +3,11 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - "zmk/corne-eyelash/**"
+      - "zmk/corne-eyelash/build.yaml"
+      - "zmk/corne-eyelash/config/**"
+      - "zmk/corne-eyelash/boards/**"
+      - "zmk/corne-eyelash/zephyr/**"
       - ".github/workflows/zmk-corne-eyelash-build.yml"
-    paths-ignore:
-      - "zmk/corne-eyelash/keymap-drawer/**"
-      - "zmk/corne-eyelash/README*.md"
 
 jobs:
   build:
