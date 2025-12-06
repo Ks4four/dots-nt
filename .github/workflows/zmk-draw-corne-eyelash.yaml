@@ -13,21 +13,42 @@ permissions:
 
 jobs:
   draw:
-    uses: caksoylar/keymap-drawer/.github/workflows/draw-zmk.yml@main
-    with:
-      # 指向 keymap 文件
-      keymap_patterns: "zmk/corne-eyelash/config/*.keymap"
-      
-      # 指向 drawer 配置文件
-      config_path: "zmk/corne-eyelash/keymap_drawer.config.yaml"
-      
-      # 输出 SVG 的文件夹
-      output_folder: "zmk/corne-eyelash/keymap-drawer"
-      
-      # === 关键修改 ===
-      # 告诉 Action 你的 west.yml 在哪里 (默认是 "config")
-      west_config_path: "zmk/corne-eyelash/config"
-      
-      # 提交信息
-      commit_message: "[Draw] Update Corne Eyelash keymap SVG"
-      destination: "commit"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install keymap-drawer
+        run: pip install keymap-drawer
+
+      - name: Draw Keymap
+        run: |
+          # 1. 确保输出目录存在
+          mkdir -p zmk/corne-eyelash/keymap-drawer
+
+          # 2. 解析 Keymap 生成 YAML
+          # -c: 配置文件路径
+          # -z: ZMK keymap 路径
+          # 输出重定向到 yaml 文件
+          keymap parse \
+            -c zmk/corne-eyelash/keymap_drawer.config.yaml \
+            -z zmk/corne-eyelash/config/eyelash_corne.keymap \
+            > zmk/corne-eyelash/keymap-drawer/eyelash_corne.yaml
+
+          # 3. 根据 YAML 生成 SVG 图片
+          keymap draw \
+            -c zmk/corne-eyelash/keymap_drawer.config.yaml \
+            zmk/corne-eyelash/keymap-drawer/eyelash_corne.yaml \
+            > zmk/corne-eyelash/keymap-drawer/eyelash_corne.svg
+
+      - name: Commit updated images
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "[Draw] Update Corne Eyelash keymap SVG"
+          # 只提交生成的文件
+          file_pattern: "zmk/corne-eyelash/keymap-drawer/*.svg zmk/corne-eyelash/keymap-drawer/*.yaml"
