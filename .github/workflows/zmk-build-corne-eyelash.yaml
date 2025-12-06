@@ -15,7 +15,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # 这里根据你原来的 build.yaml 内容手动定义的
         include:
           - board: eyelash_corne_left
             shield: nice_view_gem
@@ -35,43 +34,54 @@ jobs:
         env:
           cache-name: cache-zephyr-modules
         with:
+          # 缓存路径改为 workspace 下的目录
           path: |
-            modules/
-            tools/
-            zephyr/
-            bootloader/
-            zmk/
+            workspace/modules/
+            workspace/tools/
+            workspace/zephyr/
+            workspace/bootloader/
+            workspace/zmk/
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('zmk/corne-eyelash/config/west.yml') }}
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
 
-      - name: West Init
-        # 关键点：指定 config 所在的子目录
-        run: west init -l zmk/corne-eyelash/config
-
-      - name: West Update
-        run: west update
-
-      - name: West Zephyr Export
-        run: west zephyr-export
+      - name: Initialize West Workspace
+        run: |
+          # 创建一个隔离的目录来存放 west 工作区
+          mkdir -p workspace
+          cd workspace
+          
+          # 初始化 west，使用 -l 指向上一级目录中的 config
+          west init -l ../zmk/corne-eyelash/config
+          
+          # 更新依赖
+          west update
+          west zephyr-export
 
       - name: West Build (${{ matrix.artifact_name }})
-        # 关键点：
-        # 1. -DZMK_CONFIG 指向绝对路径的 config 文件夹
-        # 2. -DZMK_EXTRA_MODULES 指向包含 boards 的文件夹 (你的 zmk/corne-eyelash)
         run: |
+          # 进入工作区
+          cd workspace
+          
+          # 执行构建
+          # -s zmk/app: 指向刚下载的 zmk 源码中的 app
+          # -DZMK_CONFIG: 使用绝对路径指向你的 config
+          # -DZMK_EXTRA_MODULES: 指向包含 boards 的目录 (Monorepo 的子目录)
           west build -s zmk/app -b ${{ matrix.board }} -- -DSHIELD=${{ matrix.shield }} -DSNIPPET="${{ matrix.snippet }}" -DZMK_CONFIG="${GITHUB_WORKSPACE}/zmk/corne-eyelash/config" -DZMK_EXTRA_MODULES="${GITHUB_WORKSPACE}/zmk/corne-eyelash"
 
       - name: Rename artifacts
         run: |
           mkdir build_artifacts
-          if [ -f build/zephyr/zmk.uf2 ]; then
-            cp build/zephyr/zmk.uf2 "build_artifacts/${{ matrix.artifact_name }}.uf2"
-          elif [ -f build/zephyr/zephyr.uf2 ]; then
-            cp build/zephyr/zephyr.uf2 "build_artifacts/${{ matrix.artifact_name }}.uf2"
+          # 注意：构建产物现在在 workspace/build 下
+          if [ -f workspace/build/zephyr/zmk.uf2 ]; then
+            cp workspace/build/zephyr/zmk.uf2 "build_artifacts/${{ matrix.artifact_name }}.uf2"
+          elif [ -f workspace/build/zephyr/zephyr.uf2 ]; then
+            cp workspace/build/zephyr/zephyr.uf2 "build_artifacts/${{ matrix.artifact_name }}.uf2"
           else
             echo "No UF2 file found!"
+            # 打印一下目录结构方便调试（如果失败的话）
+            ls -R workspace/build/zephyr
             exit 1
           fi
 
