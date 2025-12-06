@@ -34,13 +34,8 @@ jobs:
         env:
           cache-name: cache-zephyr-modules
         with:
-          # 缓存 workspace 下的文件，确保与源码隔离
-          path: |
-            workspace/modules/
-            workspace/tools/
-            workspace/zephyr/
-            workspace/bootloader/
-            workspace/zmk/
+          # 缓存整个 workspace，包含下载的所有依赖
+          path: workspace/
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('zmk/corne-eyelash/config/west.yml') }}
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-
@@ -48,36 +43,39 @@ jobs:
 
       - name: Initialize West Workspace
         run: |
-          # 1. 创建隔离的工作区
-          mkdir -p workspace
+          # 1. 准备工作区目录结构
+          # 因为 west.yml 里定义了 "self: path: config"
+          # 所以我们必须把 west.yml 放在 config 文件夹里，west 才能正常工作
+          mkdir -p workspace/config
           
-          # 2. 将你的 west.yml 复制到工作区根目录
-          # 这样 west init 就会在这里创建环境，而不是污染你的源码目录
-          cp zmk/corne-eyelash/config/west.yml workspace/west.yml
+          # 2. 复制 manifest (west.yml) 到虚拟位置
+          cp zmk/corne-eyelash/config/west.yml workspace/config/west.yml
           
-          # 3. 进入工作区进行初始化
+          # 3. 进入工作区
           cd workspace
-          west init -l .
+          
+          # 4. 初始化 (指向 config 目录)
+          # 这会在 workspace 下下载 zmk, zephyr 等所有依赖
+          west init -l config
           west update
           west zephyr-export
 
       - name: West Build (${{ matrix.artifact_name }})
         run: |
-          # 必须在 workspace 目录执行构建
           cd workspace
           
-          # 执行构建
-          # 注意所有的路径引用：
-          # -s zmk/app: 指向 workspace/zmk/app (下载下来的源码)
-          # -DZMK_CONFIG: 使用 ${GITHUB_WORKSPACE} 引用你原本的配置路径
-          # -DZMK_EXTRA_MODULES: 引用你包含 boards 和 zephyr/module.yml 的目录
+          # 5. 执行构建
+          # -s zmk/app: 指向 workspace/zmk/app (刚下载的源码)
+          # -DZMK_CONFIG: 依然指向你的真实源码路径 (GitHub Workspace下的路径)
+          # -DZMK_EXTRA_MODULES: 依然指向你的真实源码板子路径
+          
           west build -s zmk/app -b ${{ matrix.board }} -- -DSHIELD=${{ matrix.shield }} -DSNIPPET="${{ matrix.snippet }}" -DZMK_CONFIG="${GITHUB_WORKSPACE}/zmk/corne-eyelash/config" -DZMK_EXTRA_MODULES="${GITHUB_WORKSPACE}/zmk/corne-eyelash"
 
       - name: Rename artifacts
         run: |
           mkdir build_artifacts
           
-          # 构建产物现在会在 workspace/build/zephyr 下
+          # 构建产物在 workspace/build/zephyr 下
           SRC_DIR="workspace/build/zephyr"
           
           if [ -f "$SRC_DIR/zmk.uf2" ]; then
