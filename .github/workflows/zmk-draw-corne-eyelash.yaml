@@ -15,16 +15,18 @@ jobs:
   draw:
     uses: caksoylar/keymap-drawer/.github/workflows/draw-zmk.yml@main
     with:
-      # === 删除了 root_path，因为官方脚本不支持 ===
-      
-      # 这里已经包含了完整的相对路径，Action 会找得到的
+      # 指向 keymap 文件
       keymap_patterns: "zmk/corne-eyelash/config/*.keymap"
       
-      # 配置文件路径
+      # 指向 drawer 配置文件
       config_path: "zmk/corne-eyelash/keymap_drawer.config.yaml"
       
-      # 输出路径
+      # 输出 SVG 的文件夹
       output_folder: "zmk/corne-eyelash/keymap-drawer"
+      
+      # === 关键修改 ===
+      # 告诉 Action 你的 west.yml 在哪里 (默认是 "config")
+      west_config_path: "zmk/corne-eyelash/config"
       
       # 提交信息
       commit_message: "[Draw] Update Corne Eyelash keymap SVG"
