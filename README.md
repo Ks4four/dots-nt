@@ -35,7 +35,7 @@ everything in this config assumes `:viewport` is enabled. all behaviors are desi
 trade-off: unlike other designs. this is a matter of habit.
 
 ### why not `workspace`s
-i have to admit, "workspace"s is a more robust concept. my reason is simple: my keyboard lacks a numrow, so i simply don't use them. actually, prompting the ai to implement `workspace`s logic that talks to yasb shouldn't be hard. after implementing this nonWorkspace approach, i realized that sticking to `workspace`s demands a specific mental loop: recall which `workspace` an app resides in, then press `mod` key + `#` numbers to switch. this fundamentally violates `selectFirstOperateLater`: you are forced to `operate` (context switch) before you can even `select` the target window.\
+i have to admit, `workspace`s is a more robust concept. my reason is simple: my keyboard lacks a numrow, so i simply don't use them. actually, prompting the ai to implement `workspace`s logic that talks to yasb shouldn't be hard. after implementing this nonWorkspace approach, i realized that sticking to `workspace`s demands a specific mental loop: recall which `workspace` an app resides in, then press `mod` key + `#` numbers to switch. this fundamentally violates `selectFirstOperateLater`: you are forced to `operate` (context switch) before you can even `select` the target window.\
 
 `workspace`s reminds me of `https://johnnydecimal.com/`, which uses numbers to manage files, just like using numbers to manage windows. you can assign semantics to numbers. but there is another school of thought that believes files fit `tagging` better, rather than hierarchy (`https://karl-voit.at/2020/01/25/avoid-complex-folder-hierarchies/`). `workspace`s enforces rigid categorization here. i struggled here for a while, eventually preferring `tagging`, and `jwno`'s jump `frame` functionality also helps me.
 
@@ -54,19 +54,19 @@ actually, "F23" key is just personal preference. it can be totally substituted w
 trade-off: personal preference.
 
 ### why `:set-keymap` and not `:push-keymap` or why this keymap
-in `jwno` documentation, these behave like `transientKeymaps`. in `zmk` terms, it's a `&toggle` layer. personally, managing multiple `&toggle` layers messes up my brain (too much cognitiveLoad), so i restrict `F23` as the sole `&toggle`. this way i only maintain one mental layer (another `zmk` concept: `https://zmk.dev/docs/keymaps/behaviors/layers`). no matter the current `mode`, pressing `F23` key instantly exits to `PASSTHROUGH`. that is the desired behavior. however, the real reason is that this config requires jumping between arbitrary `mode`s, and the ai seemed incapable of generating a working config using the stack-based `:push-keymap` logic, so i prompted the ai to use the imperative approach.\
+in `jwno` documentation, these behave like `transientKeymaps`. in zmk terms, it's a `&toggle` layer. personally, managing multiple `&toggle` layers messes up my brain (too much cognitiveLoad), so i restrict "F23" as the sole `&toggle`. this way i only maintain one mental layer (another `zmk` concept: `https://zmk.dev/docs/keymaps/behaviors/layers`). no matter the current `mode`, pressing "F23" key instantly exits to `PASSTHROUGH`. that is the desired behavior. however, the real reason is that this config requires jumping between arbitrary `mode`s, and the ai seemed incapable of generating a working config using the stack-based `:push-keymap` logic, so i prompted the ai to use the imperative approach.\
 trade-off: for someone just starting with `jwno`, this is extremely unfriendly. need to know a bit about keyboard layout design, `modalEditing`, `leaderKey`, the importance of `homeRow`, etc.
 
 ### why design jumping between different modes
-so that i can operate applies immediately to the selection: in `RESIZE` or `ALPHA` modes, "h"/"j"/"k"/l keys (selection) and arrow keys (adjustment) can be pressed almost simultaneously.\
+so that i can operate applies immediately to the selection: in `RESIZE` or `ALPHA` modes, "h"/"j"/"k"/"l" keys (selection) and arrow keys (adjustment) can be pressed almost simultaneously.\
 trade-off: although more flexible, real editor users might find this "goto" behavior unreasonable.
 
-### (deprecated) why choose zebar `yasb`
-`yasb` is needed to show `mode`s. also, visualising the depth calculation and the index of window-in-frame is quite necessary.\
-trade-off: `yasb` uses `QSS`, styling is hard for `ai` to modify. currently switched to `zebar`.
+### (deprecated) why choose yasb
+yasb is needed to show `mode`s. also, visualising the depth calculation and the index of window-in-frame is quite necessary.\
+trade-off: yasb uses QSS, styling is hard for ai to modify. currently switched to zebar.
 
 ### why choose zebar
-just to make it easier for `ai` to write code.
+just to make it easier for ai to write code.
 
 ### how to work with `yasb` or `zebar`
 here we just use a temp file to do `interProcessCommunication`. current state is serialized to `jwno-status.json` in real-time, so external widgets (`yasb`) can render the ui reactively without polling. this coincidentally fits the unixPhilosophy: doOneThingAndDoItWell. the `jwno-status.json` file is just a string payload that looks like this: `{"mode":"PASSTHROUGH","viewport":0,"timestamp":1764702210,"depth":0,"window":{"position":0,"total":3},"frame":{"position":1,"total":2}}`.\
@@ -83,25 +83,25 @@ here i will simply and subjectively compare my user experience across major `win
 `jwno`:\
 infinite plane, can set programmable `keymap`, sometimes not automatically organizing windows is indeed a bit annoying.
 
-`komorebi`:\
-infinite strip (enabled in nightly), guess it can also set programmable `keymap` (using `ahk`, defaults to `oneShotMod`). uses `workspace`s, as said before, i never really liked `ws`#.
+komorebi:\
+infinite strip (enabled in nightly), guess it can also set programmable `keymap` (using ahk, defaults to `oneShotMod`). uses `workspace`s, as said before, i never really liked `ws`#.
 
-`niri` (linux):\
+niri (linux):\
 infinite strip, `ws`#.
 
-`i3` (linux):\
+i3 (linux):\
 finite plane, `ws`#.
 
-`paperWM`:\
+paperWM:\
 infinite strip, unlike `ws`# above, uses an "upstairs/downstairs" relationship, rather than directly arranging semantic numeric `ws`#. this makes it so sometimes you have to walk three or four floors to get to where you want (most likely i just don't know how to use it).
 
 ## zmk
-choosing `zmk` was just because `zmk` keyboards were cheaper and more diverse at the time, and wireless function was a bonus.
+choosing zmk was just because zmk keyboards were cheaper and more diverse at the time, and wireless function was a bonus.
 
 ### keymap goals
 priority sorted as follows:\
 no thumb keys. (just pull the switch. implemented)\
-only allow pressing two keys simultaneously. (not implemented yet, need to consider how to arrange combo `mod`s, or use `ahk` to script these combo `mod` operations)\
+only allow pressing two keys simultaneously. (not implemented yet, need to consider how to arrange combo `mod`s, or use ahk to script these combo `mod` operations)\
 smooth one-handed operation. (currently no situations where i need to use keyboard suddenly while using mouse)\
 finger responsibility zones must not be disturbed. (achievable as long as not using `verticalCombo`s)\
 30 keys. (just pull the switch. implemented)
@@ -119,14 +119,14 @@ using `GACS`. since there are many variants, i won't discuss why other schemes f
 placing "Ctrl" key between "S" key and "F" key helps one-handed "Ctrl"+"S" and "Ctrl"+"F". especially "Ctrl"+"F", this is very useful for configs where mouse has thumb keys for copy/paste.\
 trade-off: cannot press "Ctrl"+"c" and "Ctrl"+"v" one-handed. solved by mouse thumb keys.
 
-"Alt" key placed to the left of "Ctrl" key. no special reason for this, just that `miryoku` used it, so i stuck with it. "Shift" key placed to the right of "Ctrl" key, same reason.
+"Alt" key placed to the left of "Ctrl" key. no special reason for this, just that miryoku used it, so i stuck with it. "Shift" key placed to the right of "Ctrl" key, same reason.
 
 "LGui" key placed below "Ctrl" key. impossible to place to the left of "Alt" key. actually could design it below "Shift" key, but forgot which app needed which key causing me to switch back. anyway no particularly convincing reason.
 
 #### keypad
 enabled and necessary.
 
-unlike `miryoku`, i don't use a single `keypad`, but fine-tune the position based on where fingers press. fine-tuning is unavoidable because no thumb keys.\
+unlike miryoku, i don't use a single `keypad`, but fine-tune the position based on where fingers press. fine-tuning is unavoidable because no thumb keys.\
 trade-off: multiple `layer`s make config unclean. but efficiency did go up a bit, whatever.
 
 #### combos
@@ -136,7 +136,7 @@ enabled and necessary.
 
 adopting bottom row 12345 numbers because chinese input is necessary, and they are actually non-semantic. stuffing semantic ("i need to type numbers") and non-semantic ("i need to press numbers to type chinese") into one `numberLayer` is actually very unreasonable. as for right hand symbol `combo`s, they are completely symmetrical to left hand "Shift" key + numbers.
 
-`combo`s above left hand `homeRow` copied from `miryoku`: "ESC" key, "TAB" key, "Space" key. placing colon in `combo` above right hand `homeRow` is just a `vim` habit, as for other symbols they are basically randomly arranged.
+`combo`s above left hand `homeRow` copied from miryoku: "ESC" key, "TAB" key, "Space" key. placing colon in `combo` above right hand `homeRow` is just a vim habit, as for other symbols they are basically randomly arranged.
 
 #### brackets
 choose rolling instead of symmetry.
@@ -154,7 +154,7 @@ disabled.
 
 `leaderKey` is actually used for not-so-commonly used commands. different apps should have different `leaderKey` scopes. using it on keyboard feels forced.
 
-i have a software (`ahk`) implemented `leaderKey`, then i define "F24" key on keyboard. i feel this is enough.
+i have ahk implemented `leaderKey`, then i define "F24" key on keyboard. i feel this is enough.
 
 #### pointing devices (zmk)
 disabled.
