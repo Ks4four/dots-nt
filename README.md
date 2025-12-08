@@ -9,7 +9,7 @@ if you want to know why, check this piece: `https://ks4four.github.io/life/softw
 
 i only allow myself to use a few styles:\
 use headings only as anchors, for external links.\
-use `inline code blocks` for in-app concepts, because sometimes app concepts aren't exactly the same as normal concepts (like `window`). also use them for bareURLs.\
+use `inline code block`s for in-app concepts, because sometimes app concepts aren't exactly the same as normal concepts (like `window`). also use them for bareURLs.\
 use lowerCamelCase for out-of-app concepts (some are common sense).\
 use soft line breaks to organize paragraphs.\
 use preview links to show images.
@@ -31,15 +31,15 @@ i literally didn't write a single character.\
 trade-off: no warranty.
 
 ### meta
-everything in this config assumes `:viewport` is enabled. all behaviors are designed around this. it is the infiniteCanvas: your monitor is just a camera looking at an infinite plane. you don't "switch workspace", you `:scroll-parent`. this is definitely not an alternative to "workspaces" concept.\
+everything in this config assumes `:viewport` is enabled. all behaviors are designed around this. it is the infiniteCanvas: your monitor is just a camera looking at an infinite plane. you don't "switch workspace", you `:scroll-parent`. this is definitely not an alternative to `workspace`s concept.\
 trade-off: unlike other designs. this is a matter of habit.
 
-### why not "workspaces"
-i have to admit, "workspaces" is a more robust concept. my reason is simple: my keyboard lacks a numrow, so i simply don't use them. actually, prompting the ai to implement "workspaces" logic that talks to yasb shouldn't be hard. after implementing this nonWorkspace approach, i realized that sticking to "workspaces" demands a specific mental loop: recall which "workspace" an app resides in, then press `mod` key + `#` numbers to switch. this fundamentally violates `selectFirstOperateLater`: you are forced to `operate` (context switch) before you can even `select` the target window.\
+### why not `workspace`s
+i have to admit, "workspace"s is a more robust concept. my reason is simple: my keyboard lacks a numrow, so i simply don't use them. actually, prompting the ai to implement `workspace`s logic that talks to yasb shouldn't be hard. after implementing this nonWorkspace approach, i realized that sticking to `workspace`s demands a specific mental loop: recall which `workspace` an app resides in, then press `mod` key + `#` numbers to switch. this fundamentally violates `selectFirstOperateLater`: you are forced to `operate` (context switch) before you can even `select` the target window.\
 
-`workspaces` reminds me of `https://johnnydecimal.com/`, which uses numbers to manage files, just like using numbers to manage windows. you can assign semantics to numbers. but there is another school of thought that believes files fit `tagging` better, rather than hierarchy (`https://karl-voit.at/2020/01/25/avoid-complex-folder-hierarchies/`). `workspaces` enforces rigid categorization here. i struggled here for a while, eventually preferring `tagging`, and `jwno`'s jump `frame` functionality also helps me.
+`workspace`s reminds me of `https://johnnydecimal.com/`, which uses numbers to manage files, just like using numbers to manage windows. you can assign semantics to numbers. but there is another school of thought that believes files fit `tagging` better, rather than hierarchy (`https://karl-voit.at/2020/01/25/avoid-complex-folder-hierarchies/`). `workspace`s enforces rigid categorization here. i struggled here for a while, eventually preferring `tagging`, and `jwno`'s jump `frame` functionality also helps me.
 
-trade-off: part of the reason people use `workspaces` is because they can quickly jump to the desired `workspace`. and an infinite plane is actually hard to manage, far less simple than the linear thinking of `workspaces`.
+trade-off: part of the reason people use `workspace`s is because they can quickly jump to the desired `workspace`. and an infinite plane is actually hard to manage, far less simple than the linear thinking of `workspace`s.
 
 ### why arrows not "h"/"j"/"k"/"l" keys
 i designed the inputs based on the nature of the operation. left/right arrow keys mean continuous values, while "h"/"j"/"k"/"l" keys is regarding windows. this bypasses the granularity conflict of using "h"/"j"/"k"/"l" keys for everything. for example, in `RESIZE`, `SCROLL`, and `ALPHA` modes, you can use "h"/"j"/"k"/"l" keys to change focus, then use arrow keys to `rapidFire` adjustments. i have a keyboard with a knob, but mapping clockwise/counter clockwise to "h" key and "l" key feels weird. left and right arrow keys don't have this issue. keymap also has logic regarding semantic modifiers. for example, "h"/"j"/"k"/"l" keys is always about `frame`s. keys with modifiers like "Ctrl" key + "h"/"j"/"k"/"l" key is `window`s.\
@@ -78,13 +78,13 @@ trade-off: not "clean", which i don't really care about.
 
 
 ### why jwno
-here i will simply and subjectively compare my user experience across major `windowManagers`. note that no matter which `windowManager` i use, I won't use them for too long.
+here i will simply and subjectively compare my user experience across major `windowManager`s. note that no matter which `windowManager` i use, I won't use them for too long.
 
 `jwno`:\
 infinite plane, can set programmable `keymap`, sometimes not automatically organizing windows is indeed a bit annoying.
 
 `komorebi`:\
-infinite strip (enabled in nightly), guess it can also set programmable `keymap` (using `ahk`, defaults to `oneShotMod`). uses `workspaces`, as said before, i never really liked `ws`#.
+infinite strip (enabled in nightly), guess it can also set programmable `keymap` (using `ahk`, defaults to `oneShotMod`). uses `workspace`s, as said before, i never really liked `ws`#.
 
 `niri` (linux):\
 infinite strip, `ws`#.
@@ -103,7 +103,7 @@ priority sorted as follows:\
 no thumb keys. (just pull the switch. implemented)\
 only allow pressing two keys simultaneously. (not implemented yet, need to consider how to arrange combo `mod`s, or use `ahk` to script these combo `mod` operations)\
 smooth one-handed operation. (currently no situations where i need to use keyboard suddenly while using mouse)\
-finger responsibility zones must not be disturbed. (achievable as long as not using `verticalCombos`)\
+finger responsibility zones must not be disturbed. (achievable as long as not using `verticalCombo`s)\
 30 keys. (just pull the switch. implemented)
 
 based on these goals, considered the following strategies.
