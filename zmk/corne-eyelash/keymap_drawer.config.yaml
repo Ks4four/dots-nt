@@ -1,4 +1,5 @@
 draw_config:
+  separate_combo_diagrams: true
   n_columns: 1
   draw_key_sides: true
   key_w: 60.0
