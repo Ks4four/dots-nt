@@ -19,9 +19,9 @@
 #
 # --- Mode Definitions ---
 # NORMAL : Navigation & Management
-# INSERT : Layout splitting (Binary Space Partitioning style)
-# RESIZE : Frame dimension adjustment
-# SCROLL : Viewport panning within frames
+# INNER  : Layout splitting (Binary Space Partitioning style)
+# SIZE   : Frame dimension adjustment
+# ROLL   : Viewport panning within frames
 # CARRY  : Moving windows between frames
 # ALPHA  : Window transparency control
 # GOTO   : UI Automation (UIA) interactions & filtering
@@ -206,9 +206,9 @@
     # Pre-allocate keymaps to allow cyclic references in mode switching
     (def km-root   (:new-keymap key-man))
     (def km-normal (:new-keymap key-man))
-    (def km-insert (:new-keymap key-man))
-    (def km-resize (:new-keymap key-man))
-    (def km-scroll (:new-keymap key-man))
+    (def km-inner  (:new-keymap key-man)) # Renamed from insert
+    (def km-size   (:new-keymap key-man)) # Renamed from resize
+    (def km-roll   (:new-keymap key-man)) # Renamed from scroll
     (def km-carry  (:new-keymap key-man))
     (def km-alpha  (:new-keymap key-man))
     (def km-goto   (:new-keymap key-man))
@@ -247,13 +247,13 @@
 # Format: "Trigger Key" -> [Keymap Object, Mode Name String]
 # Note: "n" maps to NORMAL to allow universal exit to Normal mode.
 (def modes {
-  "i" [km-insert "INSERT"]
-  "r" [km-resize "RESIZE"]
-  "s" [km-scroll "SCROLL"]
-  "c" [km-carry  "CARRY"]
-  "a" [km-alpha  "ALPHA"]
-  "g" [km-goto   "GOTO"]
-  "o" [km-outer  "OUTER"]
+  "i" [km-inner "INNER"]  # Renamed from INSERT
+  "r" [km-roll  "ROLL"]   # Swapped key, renamed from SCROLL
+  "s" [km-size  "SIZE"]   # Swapped key, renamed from RESIZE
+  "c" [km-carry "CARRY"]
+  "a" [km-alpha "ALPHA"]
+  "g" [km-goto  "GOTO"]
+  "o" [km-outer "OUTER"]
   "n" [km-normal "NORMAL"]
 })
 
@@ -331,7 +331,7 @@
     (:define-key km key [:set-mode target-km target-name])))
 
 # Apply abstractions
-(def sub-modes [km-insert km-resize km-scroll km-carry km-alpha km-goto km-outer])
+(def sub-modes [km-inner km-size km-roll km-carry km-alpha km-goto km-outer])
 (each km sub-modes (bind-common km true))
 (bind-common km-normal false)
 
@@ -375,36 +375,36 @@
       (ui-hint/uia-hinter :condition [:property UIA_ControlTypePropertyId UIA_TreeItemControlTypeId])])
     #endregion
 
-    #region [ INSERT ]
+    #region [ INNER ]
     # Split frame logic
-    (put km-insert :name "INSERT")
-    (:define-key km-insert "h" [:split-frame :horizontal 2 [0.5 0.5] insert-left])
-    (:define-key km-insert "l" [:split-frame :horizontal 2 [0.5 0.5] insert-right])
-    (:define-key km-insert "k" [:split-frame :vertical 2 [0.5 0.5] insert-above])
-    (:define-key km-insert "j" [:split-frame :vertical 2 [0.5 0.5] insert-below])
+    (put km-inner :name "INNER")
+    (:define-key km-inner "h" [:split-frame :horizontal 2 [0.5 0.5] insert-left])
+    (:define-key km-inner "l" [:split-frame :horizontal 2 [0.5 0.5] insert-right])
+    (:define-key km-inner "k" [:split-frame :vertical 2 [0.5 0.5] insert-above])
+    (:define-key km-inner "j" [:split-frame :vertical 2 [0.5 0.5] insert-below])
     #endregion
 
-    #region [ RESIZE ]
+    #region [ SIZE ]
     # Value Adjustment via Arrows/Knob
-    (put km-resize :name "RESIZE")
-    (bind-navigation km-resize) 
+    (put km-size :name "SIZE")
+    (bind-navigation km-size) 
     
-    (:define-key km-resize "Left"          [:resize-frame -100 0])
-    (:define-key km-resize "Right"         [:resize-frame 100 0])
-    (:define-key km-resize "Shift + Left"  [:resize-frame 0 -100])
-    (:define-key km-resize "Shift + Right" [:resize-frame 0 100])
-    (:define-key km-resize ";" [:zoom-in 0.7])
+    (:define-key km-size "Left"          [:resize-frame -100 0])
+    (:define-key km-size "Right"         [:resize-frame 100 0])
+    (:define-key km-size "Shift + Left"  [:resize-frame 0 -100])
+    (:define-key km-size "Shift + Right" [:resize-frame 0 100])
+    (:define-key km-size ";" [:zoom-in 0.7])
     #endregion
 
-    #region [ SCROLL ]
+    #region [ ROLL ]
     # Viewport panning
-    (put km-scroll :name "SCROLL")
-    (bind-navigation km-scroll)
+    (put km-roll :name "ROLL")
+    (bind-navigation km-roll)
     
-    (:define-key km-scroll "Left"          [:scroll-parent -200])
-    (:define-key km-scroll "Right"         [:scroll-parent 200])
-    (:define-key km-scroll "Shift + Left"  [:scroll-parent -200])
-    (:define-key km-scroll "Shift + Right" [:scroll-parent 200])
+    (:define-key km-roll "Left"          [:scroll-parent -200])
+    (:define-key km-roll "Right"         [:scroll-parent 200])
+    (:define-key km-roll "Shift + Left"  [:scroll-parent -200])
+    (:define-key km-roll "Shift + Right" [:scroll-parent 200])
     #endregion
 
     #region [ CARRY ]
