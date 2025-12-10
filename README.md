@@ -80,8 +80,6 @@ trade-off: yasb uses QSS, styling is hard for ai to modify. currently switched t
 
 just to make it easier for ai to write code.
 
-这是一个改进后的文档版本，保留了你原本的文风（小写风格、驼峰命名概念），同时准确反映了从文件 IO 到 UDP Socket 的技术转变以及“AI 变聪明”的梗。
-
 ### integration with `yasb` or `zebar`
 
 i now use a UDP Socket for `interProcessCommunication`. instead of writing to disk, current state is broadcasted to `127.0.0.1:8888` (default) as UDP datagrams in real-time. external widgets (`yasb`) listen to this port to render the ui reactively. the payload is a standard json string: `{"mode":"PASSTHROUGH","viewport":0,"timestamp":1764702210,"depth":0,"window":{"position":0,"total":3},"frame":{"position":1,"total":2}}`.
