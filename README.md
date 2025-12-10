@@ -109,6 +109,14 @@ finite plane, `ws`#.
 paperWM:\
 infinite strip, unlike `ws`# above, uses an "upstairs/downstairs" relationship, rather than directly arranging semantic numeric `ws`#. this makes it so sometimes you have to walk three or four floors to get to where you want (most likely i just don't know how to use it).
 
+## yasb
+
+yasb uses qss. this is unfriendly to ai generation. file reading time is relatively fast, but there is still a perceptible latency.
+
+## zebar
+
+it might be friendly to ai generation, but the reading time is too slow.
+
 ## zmk
 
 choosing zmk was just because zmk keyboards were cheaper and more diverse at the time, and wireless function was a bonus.
