@@ -1,4 +1,4 @@
-# dots-nt
+# idk i just use ai
 
 man hope this fits on my tombstone
 
