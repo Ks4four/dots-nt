@@ -65,11 +65,46 @@
 #endregion
 
 #region [ Status Logic & IPC ]
+#
+# [Context for LLM / AI Analysis]
+#
+# 1. Purpose: This module implements a one-way IPC bridge between the Window Manager (Jwno)
+#    and the external Status Bar (Yasb/Zebar).
+#
+# 2. Architecture: Event-Driven Push via UDP.
+#    Instead of the bar polling a file, Jwno pushes state updates via UDP datagrams
+#    immediately upon layout changes, mode switches, or window focus events.
+#
+# 3. Data Schema (JSON Payload):
+#    {
+#      "mode":      string  (e.g., "NORMAL", "RESIZE"),
+#      "viewport":  int     (1 = unconstrained/panning mode active, 0 = inactive),
+#      "timestamp": int     (Unix timestamp),
+#      "depth":     int     (Nesting level of the active frame in the BSP tree),
+#      "window":    { "position": int, "total": int },
+#      "frame":     { "position": int, "total": int }
+#    }
+#
+# 4. Implementation Details:
+#    - Uses Janet's native `net` module for networking.
+#    - JSON is constructed via string interpolation to remain dependency-free.
+#    - `net/send-to` requires a strict `core/socket-address` object, not a string.
+#
 
-    #region [ Tree Traversal ]
-    # Calculates the nesting depth of the current frame.
-    # LOGIC: Traverses the frame tree upwards via `:parent`.
-    #        Stops at the `:monitor` node to avoid counting internal root nodes.
+    # [Network Configuration]
+    # Target: Localhost port 8888 (Listened to by Yasb's JwnoUdpListener)
+    (def udp-target-port 8888) 
+    (def udp-target-ip "127.0.0.1")
+
+    # [Socket Initialization]
+    # Binds to an ephemeral local port ("0") using UDP protocol (:datagram).
+    # This socket remains open for the session lifetime.
+    (def udp-socket (net/listen "127.0.0.1" "0" :datagram))
+
+    #region [ Tree Traversal Algorithms ]
+    # [Algorithm: Depth Calculation]
+    # Traverses up the frame tree from the current node.
+    # Stops at :monitor to determine the nesting level (used for UI indentation hints).
     (defn calculate-depth [frame]
       (if (in frame :monitor)
         0 
@@ -84,7 +119,9 @@
                  (set f (in f :parent)))))
           depth)))
 
-    # Calculates sibling position indices.
+    # [Algorithm: Sibling Position]
+    # Determines the 1-based index of an item among its siblings in the BSP tree.
+    # Returns: {:position int :total int}
     (defn calculate-position [item parent-key]
       (var pos 1)
       (var total 1)
@@ -103,9 +140,11 @@
       {:position pos :total total})
     #endregion
 
-    #region [ Serialization ]
-    # Serializes the current Jwno state to JSON.
-    # Triggered by hooks to ensure external UI is always in sync.
+    #region [ State Serialization & Transmission ]
+    # [Primary Logic]
+    # 1. Gathers state metrics (Depth, Window/Frame counts, Viewport status).
+    # 2. Serializes data to JSON format.
+    # 3. Resolves address and dispatches UDP packet.
     (defn write-status-file []
       (var depth 0)
       (var win-pos 0)
@@ -115,19 +154,19 @@
       (var viewport-active 0)
       
       (when current-frame
-        # 1. Calculate Depth & Frame Position
+        # Extract hierarchy metrics
         (set depth (calculate-depth current-frame))
         (def frame-info (calculate-position current-frame :parent))
         (set frame-pos (in frame-info :position))
         (set frame-total (in frame-info :total))
         
-        # 2. Check Viewport Status (Unconstrained Mode)
+        # Check for "Unconstrained" (Viewport) mode status
         (when (in current-frame :parent)
           (def parent (in current-frame :parent))
           (when (in parent :viewport)
             (set viewport-active 1)))
 
-        # 3. Calculate Window Position within Frame
+        # Extract window metrics within the active frame
         (def children (in current-frame :children))
         (when children
           (set win-total (length children))
@@ -139,7 +178,8 @@
                 (break))
               (set i (+ i 1))))))
       
-      # 4. Construct JSON Payload
+      # [Payload Construction]
+      # Manual JSON string building to avoid external dependencies.
       (def json (string
         "{"
         `"mode":"` active-mode-name `",`
@@ -150,12 +190,14 @@
         `"frame":{"position":` frame-pos `,"total":` frame-total `}`
         "}"))
       
-      # 5. Atomic Write
-      (def f (file/open status-file :w))
-      (when f
-        (file/write f json)
-        (file/close f)))
+      # [Transmission]
+      # Note: `net/send-to` strictly requires a `core/socket-address` object.
+      # We explicitly convert IP/Port strings to an address object here.
+      (when udp-socket
+        (def dest-addr (net/address udp-target-ip udp-target-port))
+        (:send-to udp-socket dest-addr json)))
 
+    # Public hook entry point
     (defn update-status [] (write-status-file))
     #endregion
 

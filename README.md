@@ -71,24 +71,24 @@ trade-off: for someone just starting with `jwno`, this is extremely unfriendly. 
 so that i can operate applies immediately to the selection: in `RESIZE` or `ALPHA` modes, "h"/"j"/"k"/"l" keys (selection) and arrow keys (adjustment) can be pressed almost simultaneously.\
 trade-off: although more flexible, real editor users might find this "goto" behavior unreasonable.
 
-### (deprecated) why choose yasb
+### DEPRECATED: why choose yasb
 
 yasb is needed to show `mode`s. also, visualising the depth calculation and the index of window-in-frame is quite necessary.\
 trade-off: yasb uses QSS, styling is hard for ai to modify. currently switched to zebar.
 
-### why choose zebar
+### DEPRECATED: why choose zebar
 
 just to make it easier for ai to write code.
 
-### how to work with `yasb` or `zebar`
+这是一个改进后的文档版本，保留了你原本的文风（小写风格、驼峰命名概念），同时准确反映了从文件 IO 到 UDP Socket 的技术转变以及“AI 变聪明”的梗。
 
-here we just use a temp file to do `interProcessCommunication`. current state is serialized to `jwno-status.json` in real-time, so external widgets (`yasb`) can render the ui reactively without polling. this coincidentally fits the unixPhilosophy: doOneThingAndDoItWell. the `jwno-status.json` file is just a string payload that looks like this: `{"mode":"PASSTHROUGH","viewport":0,"timestamp":1764702210,"depth":0,"window":{"position":0,"total":3},"frame":{"position":1,"total":2}}`.\
-trade-off: using file IO has disk issues. the real solution is `socket`.
+### integration with `yasb` or `zebar`
 
-### why temp file
+i now use a UDP Socket for `interProcessCommunication`. instead of writing to disk, current state is broadcasted to `127.0.0.1:8888` (default) as UDP datagrams in real-time. external widgets (`yasb`) listen to this port to render the ui reactively. the payload is a standard json string: `{"mode":"PASSTHROUGH","viewport":0,"timestamp":1764702210,"depth":0,"window":{"position":0,"total":3},"frame":{"position":1,"total":2}}`.
 
-for this tool combination, the optimal solution might be a udp socket. but the ai kept trying to use `(import net)`, which is too complex for me since it requires recompiling the binary. simply concatenating a `json` string is obviously much easier.\
-trade-off: not "clean", which i don't really care about.
+### why udp (no more temp file)
+
+previously, i used a temp file because i thought using sockets in janet required external dependencies or recompiling the binary. however, the ai suddenly got smarter and demonstrated that janet's built-in `net` module handles this natively.
 
 ### why jwno
 
