@@ -199,6 +199,6 @@ disabled.
 
 primary reason is no thumb keys, secondly need 30 keys. remaining way out is writing a `modLayer`, but this is equivalent to using two keys to press one `mod`, violating the goal "only allow pressing two keys simultaneously". decided against it after ruling this out.
 
-#### keymap visualizing
+#### keymap
 
-![Eyelash Corne Keymap](zmk/corne-eyelash/keymap-drawer/eyelash_corne.svg)
+too long to show combos: `https://github.com/Ks4four/dots-nt/blob/main/zmk/corne-eyelash/keymap-drawer/eyelash_corne.svg`
