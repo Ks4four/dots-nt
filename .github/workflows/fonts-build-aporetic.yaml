@@ -1,10 +1,10 @@
 name: Build Aporetic Fonts
 
 on:
-  workflow_dispatch: # 允许你在 GitHub 网页上手动点击按钮触发构建
+  workflow_dispatch:
   push:
     paths:
-      - 'fonts/private-build-plans.toml' # 当你修改这个配置文件并推送时自动触发
+      - 'fonts/private-build-plans.toml'
 
 jobs:
   build:
@@ -13,7 +13,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # 这里列出了你配置文件中定义的四个构建计划名称
         plan: [aporetic-sans-mono, aporetic-sans, aporetic-serif-mono, aporetic-serif]
 
     steps:
@@ -27,7 +26,9 @@ jobs:
         with:
           repository: be5invis/Iosevka
           path: Iosevka
-          fetch-depth: 1 # 只拉取最新代码，节省时间
+          # 修复: 移除 fetch-depth: 1，改用 filter: blob:none
+          # 这是一种"无树克隆"，对于巨型仓库比浅克隆更稳定，且速度也很快
+          filter: blob:none 
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -43,20 +44,22 @@ jobs:
       - name: Prepare Build
         working-directory: ./Iosevka
         run: |
-          # 安装 Iosevka 的依赖
           npm install
-          # 将你的配置文件复制到 Iosevka 的构建目录中
+          # 复制配置文件
           cp ../dotfiles/fonts/private-build-plans.toml .
+          # 验证文件是否复制成功 (用于调试)
+          ls -l private-build-plans.toml
 
       - name: Build TTF
         working-directory: ./Iosevka
         run: |
-          # 运行构建命令
-          npm run build -- ttf::${{ matrix.plan }}
+          # 增加 --no-save 防止 npm 试图写入 package-lock.json 导致权限问题
+          npm run build -- ttf::${{ matrix.plan }} --no-save
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: font-${{ matrix.plan }}
           path: Iosevka/dist/${{ matrix.plan }}/ttf/*.ttf
+          if-no-files-found: warn
           retention-days: 5
