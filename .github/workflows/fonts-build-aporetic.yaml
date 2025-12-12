@@ -14,64 +14,52 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # 你的四个构建计划
         plan: [aporetic-sans-mono, aporetic-sans, aporetic-serif-mono, aporetic-serif]
 
     steps:
-      # 1. 检出你的配置仓库
       - name: Checkout Dotfiles
         uses: actions/checkout@v4
         with:
           path: dotfiles
-          submodules: false # 显式禁用子模块以避免报错
+          submodules: false
 
-      # 2. 准备环境
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # 3. 安装必要的系统工具
       - name: Install System Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y ttfautohint
 
-      # 4. 直接下载 Iosevka 源码 (避开 Git 克隆问题)
       - name: Download Iosevka Source
         run: |
-          echo "Downloading Iosevka Source Code..."
-          # 下载 v32.5.0 版本的源码 (稳定版)
+          echo "Downloading Iosevka v32.5.0..."
           wget -q https://github.com/be5invis/Iosevka/archive/refs/tags/v32.5.0.zip -O iosevka.zip
-          
-          echo "Unzipping..."
           unzip -q iosevka.zip
-          
-          # 重命名解压后的文件夹为 Iosevka，方便后面操作
           mv Iosevka-32.5.0 Iosevka
 
-      # 5. 准备并构建
       - name: Build TTF
         working-directory: ./Iosevka
         run: |
-          # 1. 安装 NPM 依赖
           npm install
 
-          # 2. 复制你的配置文件进去
           echo "Copying configuration..."
           cp ../dotfiles/fonts/private-build-plans.toml .
-          
-          # 3. 验证文件是否存在
-          if [ ! -f private-build-plans.toml ]; then
-              echo "Error: Configuration file not found!"
-              exit 1
-          fi
 
-          # 4. 开始构建
+          # === 自动修复步骤 ===
+          # Iosevka v32 中 cv65 (Thorn) 没有选项 4 了，这里自动将其改为 1 (标准样式)
+          # 同时也检查并修复 cv65 在 serif 里的配置
+          echo "Patching invalid cv65 value..."
+          sed -i 's/cv65 = 4/cv65 = 1/g' private-build-plans.toml
+          
+          # 验证修复结果
+          grep "cv65" private-build-plans.toml
+
           echo "Building ${{ matrix.plan }}..."
           npm run build -- ttf::${{ matrix.plan }} --no-save
 
-      # 6. 上传产物
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
