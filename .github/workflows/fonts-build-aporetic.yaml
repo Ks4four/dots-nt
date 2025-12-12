@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - 'fonts/private-build-plans.toml'
+      - '.github/workflows/fonts-build-aporetic.yaml'
 
 jobs:
   build:
@@ -13,49 +14,64 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # 你的四个构建计划
         plan: [aporetic-sans-mono, aporetic-sans, aporetic-serif-mono, aporetic-serif]
 
     steps:
+      # 1. 检出你的配置仓库
       - name: Checkout Dotfiles
         uses: actions/checkout@v4
         with:
           path: dotfiles
+          submodules: false # 显式禁用子模块以避免报错
 
-      - name: Checkout Iosevka Repo
-        uses: actions/checkout@v4
-        with:
-          repository: be5invis/Iosevka
-          path: Iosevka
-          # 修复: 移除 fetch-depth: 1，改用 filter: blob:none
-          # 这是一种"无树克隆"，对于巨型仓库比浅克隆更稳定，且速度也很快
-          filter: blob:none 
-
+      # 2. 准备环境
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install Dependencies
+      # 3. 安装必要的系统工具
+      - name: Install System Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y ttfautohint
-          npm install -g pnpm
 
-      - name: Prepare Build
-        working-directory: ./Iosevka
+      # 4. 直接下载 Iosevka 源码 (避开 Git 克隆问题)
+      - name: Download Iosevka Source
         run: |
-          npm install
-          # 复制配置文件
-          cp ../dotfiles/fonts/private-build-plans.toml .
-          # 验证文件是否复制成功 (用于调试)
-          ls -l private-build-plans.toml
+          echo "Downloading Iosevka Source Code..."
+          # 下载 v32.5.0 版本的源码 (稳定版)
+          wget -q https://github.com/be5invis/Iosevka/archive/refs/tags/v32.5.0.zip -O iosevka.zip
+          
+          echo "Unzipping..."
+          unzip -q iosevka.zip
+          
+          # 重命名解压后的文件夹为 Iosevka，方便后面操作
+          mv Iosevka-32.5.0 Iosevka
 
+      # 5. 准备并构建
       - name: Build TTF
         working-directory: ./Iosevka
         run: |
-          # 增加 --no-save 防止 npm 试图写入 package-lock.json 导致权限问题
+          # 1. 安装 NPM 依赖
+          npm install
+
+          # 2. 复制你的配置文件进去
+          echo "Copying configuration..."
+          cp ../dotfiles/fonts/private-build-plans.toml .
+          
+          # 3. 验证文件是否存在
+          if [ ! -f private-build-plans.toml ]; then
+              echo "Error: Configuration file not found!"
+              exit 1
+          fi
+
+          # 4. 开始构建
+          echo "Building ${{ matrix.plan }}..."
           npm run build -- ttf::${{ matrix.plan }} --no-save
 
+      # 6. 上传产物
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
